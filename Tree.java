@@ -11,11 +11,8 @@ public class Tree {
 
     static Vector[] directions = {
             new Vector().set(1, 0),
-            new Vector().set(1, 1),
-            new Vector().set(0, 1),
-            new Vector().set(-1, 1),
             new Vector().set(-1, 0),
-            new Vector().set(-1, -1),
+            new Vector().set(-1,-1),
             new Vector().set(0, -1),
             new Vector().set(1, -1),
     };
@@ -24,7 +21,10 @@ public class Tree {
 
     static int MIN_BRANCH_LENGTH = 4;
     static int MIN_BRANCH_LENGTH_2 = 12;
-    static double BRANCH_PROBABILITY = 0.015;
+    static double BRANCH_PROBABILITY = 0.01;
+
+    static int LEAF_SIZE = 60;
+    static int LEAF_DEPTH = 4;
 
     public static void main(String[] args) throws IOException {
         BufferedImage image = new BufferedImage(1000, 1000, BufferedImage.TYPE_INT_ARGB);
@@ -38,7 +38,7 @@ public class Tree {
     public static void drawTree(BufferedImage image) {
         Vector position = new Vector().set(image.getWidth() / 2, image.getHeight() - 1);
 
-        branch(image, position, 6,250);
+        branch(image, position, 3,250, 0);
 
     }
 
@@ -53,11 +53,12 @@ public class Tree {
     public static void branch(BufferedImage image,
                               Vector pos,
                               int dirIndex,
-                              int length) {
+                              int length,
+                              int depth) {
 
         if (length < MIN_BRANCH_LENGTH) return;
 
-        leaf(image, pos);
+        if(depth > LEAF_DEPTH) leaf(image, pos);
 
         Vector position = new Vector().set(pos.x, pos.y);
         int color = 0xFFC9C8C8;
@@ -70,23 +71,25 @@ public class Tree {
             }
             position.add(directions[dirIndex]);
             if(RNG.nextFloat() < BRANCH_PROBABILITY)
-                branch(image, position, addDir(dirIndex, RNG.nextInt(3) - 1), 2 * length / 3);
+                branch(image, position, addDir(dirIndex, RNG.nextInt(3) - 1), 2 * length / 3, depth + 1);
         }
 
         if (length < MIN_BRANCH_LENGTH_2) return;
 
-        branch(image, position, addDir(dirIndex, 1), 2 * length / 3);
-        branch(image, position, addDir(dirIndex, -1), 2 * length / 3);
-        branch(image, position, dirIndex, length / 2);
+        branch(image, position, addDir(dirIndex, 1), 2 * length / 3, depth + 1);
+        branch(image, position, addDir(dirIndex, -1), 2 * length / 3, depth + 1);
+        branch(image, position, dirIndex, length / 2, depth + 1);
     }
 
     public static void leaf(BufferedImage image, Vector pos) {
         int color = randomColor();
-        for(int x = 0; x < 10; ++x) {
-            for(int y = 0; y < 10; ++y) {
-                if(pos.x + x - 5 < 0 || pos.x + x - 5 >= image.getWidth() ||
-                        pos.y + y - 5 < 0 || pos.y + y - 5 >= image.getHeight()) return;
-                image.setRGB(pos.x + x - 5, pos.y + y - 5, color);
+        for(int x = -LEAF_SIZE; x < LEAF_SIZE; ++x) {
+            for(int y = (int)-Math.sqrt(LEAF_SIZE - x*x); y < (int)Math.sqrt(LEAF_SIZE - x*x); ++y) {
+                int x1 = pos.x + x - LEAF_SIZE / 2;
+                int y1 = pos.y + y - LEAF_SIZE / 2;
+                if(x1 < 0 || x1 >= image.getWidth() ||
+                        y1 < 0 || y1 >= image.getHeight()) return;
+                image.setRGB(x1, y1, color);
             }
         }
     }
