@@ -12,20 +12,25 @@ public class Tree {
 		int dimension_x = 2000;
 		int dimension_y = dimension_x;
         BufferedImage image = new BufferedImage(dimension_x, dimension_y, BufferedImage.TYPE_INT_ARGB);
-        paintEntirely(image, 0xFF193A70);
 		
-		BufferedImage sources[] = {
+		BufferedImage[] sources = {
 			//ImageIO.read(new File("cherryTreeColorSample.jpg")),
 			ImageIO.read(new File("cheneColorSample.jpg")),
 			ImageIO.read(new File("sapinColorSample.jpg")),
 			ImageIO.read(new File("autumnColorSample1.jpg")),
 			ImageIO.read(new File("autumnColorSample2.jpg"))
 		};
+		
+		
+		int skyHeight = RNG.nextInt(dimension_y/2);
+		int groundHeight = dimension_y - skyHeight;
+		paintRectangle(image, 0xFF4B9EF4, 0, dimension_x, 0, skyHeight); // paints the sky
+		paintRectangle(image, 0xFF1E391C, 0, dimension_x, skyHeight, dimension_y); // paints the ground
 
-		int n = 25;
+		int n = groundHeight / 50;
 		for(int i = 0; i < n; ++i) {
-			for(int j = 0; j < 3*n - 3*i; ++j){
-				Vector position = new Vector().set(RNG.nextInt(dimension_x), dimension_y * i / n + RNG.nextInt(dimension_y / n));		
+			for(int j = 0; j < 4*n - 4*i; ++j){
+				Vector position = new Vector().set(RNG.nextInt(dimension_x), groundHeight * i / n + RNG.nextInt(groundHeight / n) + skyHeight);		
 				TreeDrawer drawer = new TreeDrawer(image, sources[RNG.nextInt(sources.length)], position, dimension_x / 60 + i*dimension_x / (n * 40));		
 				drawer.drawTree();
 			}
@@ -35,9 +40,10 @@ public class Tree {
         ImageIO.write(image, "png", new File("result.png"));
     }
 
-    public static void paintEntirely(BufferedImage image, int color){
-        for(int x = 0; x < image.getWidth(); ++x) {
-            for(int y = 0; y < image.getHeight(); ++y) {
+    public static void paintRectangle(BufferedImage image, int color, int x1, int x2, int y1, int y2){
+		//x2, y2 excluded
+        for(int x = x1; x < x2; ++x) {
+            for(int y = y1; y < y2; ++y) {
                 image.setRGB(x, y, color);
             }
         }
@@ -79,7 +85,7 @@ class TreeDrawer {
 	static int a = 15;
 	static int b = -3*a;
 	
-	static int BRANCH_COLOR = 0xFFC9C8C8;
+	static int BRANCH_COLOR = 0xFFb4b09a;
 	
 	int initLength;
 	Vector initPosition;
